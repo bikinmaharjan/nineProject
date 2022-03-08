@@ -5,6 +5,10 @@ const dotenv = require('dotenv');
 dotenv.config({ path: './config/config.env' });
 
 const app = express();
+
+//ROUTES
+app.use('/', require('./routes/routes'));
+
 const PORT = process.env.PORT || 3000;
 
 app.listen(
