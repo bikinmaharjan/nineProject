@@ -9,8 +9,8 @@ router.post('/articles', async (req, res) => {
   try {
     const savedArticle = await newArticle.save();
     res.status(200).json(savedArticle);
-  } catch (err) {
-    res.status(500).json(err);
+  } catch (error) {
+    res.status(500).json(error);
   }
 });
 
@@ -22,8 +22,13 @@ router.get('/articles', (req, res) => {
 
 //@desc     Article by ID
 //@route    GET  /articles/:id
-router.get('/articles/:id', (req, res) => {
-  res.send();
+router.get('/articles/:id', async (req, res) => {
+  try {
+    const article = await Article.findById(req.params.id);
+    res.status(200).json(article);
+  } catch (error) {
+    res.status(500).json(error);
+  }
 });
 
 //@desc     Articles by tagname and date
