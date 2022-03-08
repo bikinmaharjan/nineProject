@@ -13,6 +13,10 @@ mongoose
 
 const app = express();
 
+//Body parser
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
+
 //ROUTES
 app.use('/', require('./routes/routes'));
 

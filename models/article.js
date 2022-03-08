@@ -1,18 +1,13 @@
 const mongoose = require('mongoose');
 
 const ArticleSchema = new mongoose.Schema({
-  id: {
-    type: Number,
-    required: true,
-    unique: true,
-  },
   title: {
     type: String,
     required: true,
   },
   date: {
     type: Date,
-    required: true,
+    default: Date.now,
   },
   body: {
     type: String,
