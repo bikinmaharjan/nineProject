@@ -16,8 +16,13 @@ router.post('/articles', async (req, res) => {
 
 //@desc     All articles
 //@route    GET  /articles/:id
-router.get('/articles', (req, res) => {
-  res.send('hello');
+router.get('/articles', async (req, res) => {
+  try {
+    const articles = await Article.find();
+    res.status(200).json(articles);
+  } catch (error) {
+    res.status(500).json(error);
+  }
 });
 
 //@desc     Article by ID
@@ -33,8 +38,6 @@ router.get('/articles/:id', async (req, res) => {
 
 //@desc     Articles by tagname and date
 //@route    GET /tags/:tagName/:date
-router.get('/tags/:tagName/:date', (req, res) => {
-  res.send();
-});
+router.get('/tags/:tagName/:date', (req, res) => {});
 
 module.exports = router;
