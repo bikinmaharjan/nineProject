@@ -38,7 +38,7 @@ router.get('/articles/:id', async (req, res) => {
   }
 });
 
-//@desc     Articles by tagname and date
+//@desc     Get Articles & count of articles with specific tag on specific date
 //@route    GET /tags/:tagName/:date
 router.get('/tags/:tagName/:date', async (req, res) => {
   try {
@@ -54,41 +54,43 @@ router.get('/tags/:tagName/:date', async (req, res) => {
       $and: [
         {
           date: {
-            $gte: start,
-            $lte: end,
+            $gte: new Date(start),
+            $lte: new Date(end),
           },
           tags: tagName,
         },
       ],
     };
-    // //Getting Articles with the same date
-    // articleByDateAndTag = await Article.find({
-    //   $and: [
-    //     {
-    //       date: {
-    //         $gte: start,
-    //         $lte: end,
-    //       },
-    //       tags: tagName,
-    //     },
-    //   ],
-    // });
 
     //Count of article for the date with the tag
     const tagCount = await Article.count(requiredCondition);
 
-    //10 Articles Id
-    const articleIdWithTag = await Article.distinct('_id', requiredCondition);
+    //10 Articles Id from latest date posted with the tag
+    const sortedArticle = await Article.aggregate([
+      {
+        //Syntax for aggregate doesn't match the requiredCondition condition
 
-    const sort = await Article.aggregate([
-      { $match: requiredCondition },
+        $match: {
+          date: {
+            $gte: new Date(start),
+            $lte: new Date(end),
+          },
+          tags: tagName,
+        },
+      },
       { $group: { _id: '$_id' } },
       { $sort: { date: -1 } },
       { $limit: 10 },
     ]);
+
+    finalArticleId = sortedArticle.map(function (obj) {
+      return obj._id;
+    });
+
     //Finding the related tags
     const relatedTags = await Article.distinct('tags', requiredCondition);
-    // Removing
+
+    // Removing query tagName from the array
     const index = relatedTags.indexOf(tagName);
     if (index > -1) {
       relatedTags.splice(index, 1);
@@ -96,11 +98,9 @@ router.get('/tags/:tagName/:date', async (req, res) => {
 
     res.status(200).json({
       tag: tagName,
-      // articleByDateAndTag,
       count: tagCount,
-      articles: articleIdWithTag,
+      articles: finalArticleId,
       related_tags: relatedTags,
-      sort,
     });
   } catch (error) {
     res.status(500).json(error);
