@@ -61,26 +61,38 @@ router.get('/tags/:tagName/:date', async (req, res) => {
         },
       ],
     };
-    //Getting Articles with the same date
-    articleByDateAndTag = await Article.find({
-      $and: [
-        {
-          date: {
-            $gte: start,
-            $lte: end,
-          },
-          tags: tagName,
-        },
-      ],
-    });
+    // //Getting Articles with the same date
+    // articleByDateAndTag = await Article.find({
+    //   $and: [
+    //     {
+    //       date: {
+    //         $gte: start,
+    //         $lte: end,
+    //       },
+    //       tags: tagName,
+    //     },
+    //   ],
+    // });
 
     //Count of article for the date with the tag
     const tagCount = await Article.count(requiredCondition);
 
+    //10 Articles Id
     const articleIdWithTag = await Article.distinct('_id', requiredCondition);
 
+    const sort = await Article.aggregate([
+      { $match: requiredCondition },
+      { $group: { _id: '$_id' } },
+      { $sort: { date: -1 } },
+      { $limit: 10 },
+    ]);
     //Finding the related tags
     const relatedTags = await Article.distinct('tags', requiredCondition);
+    // Removing
+    const index = relatedTags.indexOf(tagName);
+    if (index > -1) {
+      relatedTags.splice(index, 1);
+    }
 
     res.status(200).json({
       tag: tagName,
@@ -88,6 +100,7 @@ router.get('/tags/:tagName/:date', async (req, res) => {
       count: tagCount,
       articles: articleIdWithTag,
       related_tags: relatedTags,
+      sort,
     });
   } catch (error) {
     res.status(500).json(error);
