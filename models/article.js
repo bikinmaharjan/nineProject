@@ -17,7 +17,6 @@ const ArticleSchema = new mongoose.Schema({
   tags: {
     type: Array,
     required: false,
-    lowercase: true,
   },
 });
 
