@@ -44,12 +44,14 @@ router.get('/tags/:tagName/:date', async (req, res) => {
   try {
     tagName = req.params.tagName;
     reqDate = req.params.date;
-
+    //converting the string date to proper date fomat
     dDate = moment(reqDate).format('YYYY-MM-DD');
 
+    //converting the date to local time
     start = moment(moment(dDate).startOf('day')).local();
     end = moment(moment(dDate).endOf('day')).local();
 
+    //Required condtion to match the path
     const requiredCondition = {
       $and: [
         {
@@ -69,7 +71,6 @@ router.get('/tags/:tagName/:date', async (req, res) => {
     const sortedArticle = await Article.aggregate([
       {
         //Syntax for aggregate doesn't match the requiredCondition condition
-
         $match: {
           date: {
             $gte: new Date(start),
@@ -83,6 +84,7 @@ router.get('/tags/:tagName/:date', async (req, res) => {
       { $limit: 10 },
     ]);
 
+    //since the result is an array of Object. Mapping it to be a proper array
     finalArticleId = sortedArticle.map(function (obj) {
       return obj._id;
     });
